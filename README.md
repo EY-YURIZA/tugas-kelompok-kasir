@@ -47,37 +47,104 @@ Langkah-langkah program saat dijalankan:
 | **5** | Total belanja awal dikurangi dengan nominal potongan, lalu kembalikan hasilnya. |
 | **6** | Tampilkan hasil akhir lewat fungsi `print` di `main()`. |
 
-### 5. Flowchart Logika Program
+
+### 5. Simulasi & Verifikasi Uji Kasus (Trace Table)
+
+| Kasus Uji | Total Belanja | Membership | Persen Diskon | Perhitungan Awal | Batas Maks (Rp 25.000) | Potongan Akhir | Total Bayar |
+| :---: | :--- | :---: | :---: | :--- | :--- | :--- | :--- |
+| **Kasus 1** | Rp 80.000 | `false` | 0 | 0 × 80.000 = 0 | Tidak terkena batas | Rp 0 | Rp 80.000 |
+| **Kasus 2** | Rp 150.000 | `false` | 10 | 0.10 × 150.000 = 15.000 | Belum capai batas | Rp 15.000 | Rp 135.000 |
+| **Kasus 3** | Rp 150.000 | `true` | 15 | 0.15 × 150.000 = 22.500 | Belum capai batas | Rp 22.500 | Rp 127.500 |
+| **Kasus 4** | Rp 300.000 | `true` | 15 | 0.15 × 300.000 = 45.000 | Kena batas ≥ 25.000 | Rp 25.000 | Rp 275.000 |
+
+
+### 6. Kode Program (main.dart)
+// Cek dulu pembelinya dapet diskon berapa persen
+double hitungPersenDiskon(double totalBelanja, bool membership){
+  // Kalo belanja 100rb ke atas dan dia punya kartu member, dapet diskon 15% (10% + tambahan 5%)
+  if (totalBelanja >= 100000 && membership == true) {
+    return 0.15;
+  }
+  // Kalo belanjanya 100rb ke atas tapi bukan member, dapetnya 10% aja
+  if (totalBelanja >= 100000 && membership == false) {
+    return 0.10;
+  }
+  // Kalo belanjanya di bawah 100rb, gak dapet diskon sama sekali
+  return 0;
+}
+
+// 2. Ngitung jumlah uang potongannya dari persenan di atas
+double hitungPotongan(double diskon, double totalBelanja) {
+  double potongan = diskon * totalBelanja;
+  
+  // Sesuai aturan toko, maksimal potongannya cuma mentok di 25.000, gak boleh lebih
+  if (potongan >= 25000){
+    return 25000;
+  }
+  return potongan;
+}
+
+// 3. Ngitung total akhir uang yang harus dibayar pembeli
+double hitungTotalBayar(double totalBelanja, bool membership){
+  
+  // Panggil fungsi diskon buat nyari persenannya
+  double persen = hitungPersenDiskon(totalBelanja, membership);
+  
+  // Panggil fungsi potongan buat nyari nominal uang potongannya
+  double potongan = hitungPotongan(persen, totalBelanja);
+
+  // Harga belanjaan asli tinggal dikurangin sama potongannya
+  double totalBayar = totalBelanja - potongan;
+
+  return totalBayar;
+}
+
+void main() {
+  // Langsung print semuanya 
+  print(hitungTotalBayar(80000,false));
+  print(hitungTotalBayar(150000,false));
+  print(hitungTotalBayar(150000,true));
+  print(hitungTotalBayar(300000,true));
+}
+
+### 7. Flowchart Logika Program
 
 ```text
 [ MULAI ]
     |
     v
-( Masukkan: totalBelanja & membership )
+( Input: Total Belanja & Status Member )
     |
     v
-[ Cek: Apakah totalBelanja >= 100.000 & membership == true? ]
-    |-- ( YA ) ---> Kembalikan Diskon 0.15 (15%)
-    |
-    v ( TIDAK )
-[ Cek: Apakah totalBelanja >= 100.000 & membership == false? ]
-    |-- ( YA ) ---> Kembalikan Diskon 0.10 (10%)
-    |
-    v ( TIDAK )
-[ Kembalikan Diskon 0 (Tidak dapet) ]
+[ Apakah Total Belanja >= 100.000? ]
+    |-- (TIDAK) ---------------------> Diskon = 0%
+    |                                      |
+    v (YA)                                 |
+[ Apakah Status Member = True? ]           |
+    |-- (TIDAK) -> Diskon = 10%            |
+    |                  |                   |
+    v (YA)             |                   |
+Diskon = 15%           |                   |
+    |                  |                   |
+    +------------------+-------------------+
+    | (Semua alur diskon kumpul di sini)
+    v
+[ Hitung: Potongan = Diskon x Total Belanja ]
     |
     v
-[ Hitung: potongan = diskon * totalBelanja ]
+[ Apakah Potongan > 25.000? ]
+    |-- (YA) ----> Potongan dipaksa jadi 25.000
+    |                  |
+    v (TIDAK)          |
+    |                  |
+    +------------------+
     |
     v
-[ Apakah potongan >= 25.000? ]
-    |-- ( YA ) ---> Batasi potongan jadi 25.000
-    |
-    v ( TIDAK / Aman )
-[ Hitung: totalBayar = totalBelanja - potongan ]
+[ Hitung: Total Bayar = Total Belanja - Potongan ]
     |
     v
-( Cetak hasil lewat print() )
+( Tampilkan Harga Final ke Layar )
     |
     v
 [ SELESAI ]
+
